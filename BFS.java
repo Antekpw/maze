@@ -18,7 +18,7 @@ public class BFS implements Runnable {
         this.g = g;
     }
 
-    
+
     public lista<Visitors> bfs_search(){
         Queue<Element> q = new Queue<>();
         Fileread.markVisited(lab,x0,y0);
@@ -41,8 +41,8 @@ public class BFS implements Runnable {
                     continue;
                 }
                 if(Fileread.isInvalidPosition(lab,newx,newy)){
-                        continue;
-                    }
+                    continue;
+                }
                 Element nowy = new Element(newx,newy);
                 Visitors v = new Visitors(newx,newy,(i+2)%4);
                 visited.add(v);
@@ -62,7 +62,7 @@ public class BFS implements Runnable {
         Queue<Element> q = new Queue<>();
         lista<Visitors> visited = new lista<>();
         Fileread.markVisited(lab,x0,y0);
-        g.changeColor(g.maze,x0,y0,w);
+        //g.changeColor(g.maze,x0,y0,w);
         Element el = new Element(x0,y0);
         q.enqueue(el);
         int [] dx = {0,1,0,-1};
@@ -73,7 +73,11 @@ public class BFS implements Runnable {
             int ry = r.y;
             Fileread.markVisited(lab,rx,ry);
             g.changeColor(g.maze,rx,ry,w);
+            if(rx == x0 && ry == y0){
+                g.colorStart(g.maze,rx,ry,w);
+            }
             if(rx == xk && ry == yk){
+                g.colorEnd(g.maze,rx,ry,w);
                 break;
             }
             for(int i=0; i<4; i++){
@@ -99,21 +103,22 @@ public class BFS implements Runnable {
         }
         Queue<Element> q2 = new Queue<>();
         Fileread.markPath(lab,xk,yk);
-        g.colorPath(g.maze, xk, yk, w);
         Element e = new Element(xk,yk);
         q2.enqueue(e);
-       
+
         while(!q2.isEmpty()){
             Element r = q2.dequeue();
             int rx = r.x;
             int ry = r.y;
             if(rx==x0 && ry == y0){
                 Fileread.markPath(lab,rx,ry);
-                g.colorPath(g.maze, rx, ry, w);
                 break;
             }
             Fileread.markPath(lab,rx,ry);
             g.colorPath(g.maze, rx, ry, w);
+            if(rx == xk && ry == yk){
+                g.colorEnd(g.maze,rx,ry,w);
+            }
             int dir = Visitors.get_direction(visited,rx,ry);
             int newx = rx + dx[dir];
             int newy = ry + dy[dir];
@@ -130,7 +135,6 @@ public class BFS implements Runnable {
                 f.printStackTrace();
             }
         }
-    Fileread.print(lab);
+        Fileread.print(lab);
     }
 }
-
