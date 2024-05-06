@@ -37,7 +37,7 @@ public class BFS implements Runnable {
             for(int i=0; i<4; i++){
                 int newx = rx + dx[i];
                 int newy = ry + dy[i];
-                if((newx<0 || newx >=w) || (newy<0 || newy>=h)){
+                if((newx<0 || newx >w) || (newy<0 || newy>h)){
                     continue;
                 }
                 if(Fileread.isInvalidPosition(lab,newx,newy)){
@@ -83,7 +83,7 @@ public class BFS implements Runnable {
             for(int i=0; i<4; i++){
                 int newx = rx + dx[i];
                 int newy = ry + dy[i];
-                if((newx<0 || newx >=w) || (newy<0 || newy>=h)){
+                if((newx<0 || newx >=w-1) || (newy<0 || newy>=h-1)){
                     continue;
                 }
                 if(Fileread.isInvalidPosition(lab,newx,newy)){
@@ -122,7 +122,6 @@ public class BFS implements Runnable {
             int dir = Visitors.get_direction(visited,rx,ry);
             int newx = rx + dx[dir];
             int newy = ry + dy[dir];
-            //System.out.printf("newx = %d, newy = %d\n",newx,newy);
             if(newx == -1){
                 break;
             }

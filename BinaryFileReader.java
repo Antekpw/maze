@@ -3,65 +3,41 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import javax.print.StreamPrintService;
+import java.io.RandomAccessFile;
+import java.io.FileNotFoundException;
+
 
 public class BinaryFileReader {
-    public static void main(String[] args) {
-        try (DataInputStream inputStream = new DataInputStream(new FileInputStream("maze.bin"))) {
-            long fileId = inputStream.readInt() & 0xFFFFFFFFL; 
-            System.out.println("File_Id: " + fileId);
-            
-            byte escape = inputStream.readByte(); 
-            System.out.println("Escape: " + escape);
+    public static void binRead(String fileName) {
+        try (DataInputStream inputStream = new DataInputStream(new FileInputStream(fileName))) {
+           
+            RandomAccessFile randomAccessFile = new RandomAccessFile(fileName, "r");
+            int fileID = Integer.reverseBytes(randomAccessFile.readInt());
+            int escape = randomAccessFile.read();
+                int columns = Short.reverseBytes(randomAccessFile.readShort());
+                int lines = Short.reverseBytes(randomAccessFile.readShort());
+                int entryX = Short.reverseBytes(randomAccessFile.readShort());
+                int entryY = Short.reverseBytes(randomAccessFile.readShort());
+                int exitX = Short.reverseBytes(randomAccessFile.readShort());
+                int exitY = Short.reverseBytes(randomAccessFile.readShort());
+                randomAccessFile.skipBytes(12);
+                int counter = Integer.reverseBytes(randomAccessFile.readInt());
+                randomAccessFile.readInt();
+                char separator = (char) randomAccessFile.read();
+                char wall = (char) randomAccessFile.read();
+                char path = (char) randomAccessFile.read();
+          
+            int newline=0;
+            FileOutputStream decodedMaze = new FileOutputStream("decoded.txt");
+            for (int i = 0; i < counter; i++) {
 
-            int columns = inputStream.readUnsignedShort(); 
-            System.out.println("Columns: " + columns);
-            
-            int lines = inputStream.readUnsignedShort(); 
-            System.out.println("Lines: " + lines);
-            
-            int entryX = inputStream.readUnsignedShort(); 
-            System.out.println("Entry_X: " + entryX);
-            
-            int entryY = inputStream.readUnsignedShort(); 
-            System.out.println("Entry_Y: " + entryY);
-            
-            int exitX = inputStream.readUnsignedShort(); 
-            System.out.println("Exit_X: " + exitX);
-            
-            int exitY = inputStream.readUnsignedShort(); 
-            System.out.println("Exit_Y: " + exitY);
-            
-            long[] reserved = new long[3];
-            for (int i = 0; i < 3; i++) {
-                reserved[i] = inputStream.readInt() & 0xFFFFFFFFL; 
-            }
-            System.out.println("Reserved: " + java.util.Arrays.toString(reserved));
-            
-            long counter = inputStream.readInt() & 0xFFFFFFFFL; 
-            System.out.println("Counter: " + counter);
-            
-            long solutionOffset = inputStream.readInt() & 0xFFFFFFFFL; 
-            System.out.println("Solution_Offset: " + solutionOffset);
-            
-            byte separator = inputStream.readByte(); 
-            System.out.println("Separator: " + separator);
-            
-            byte wall = inputStream.readByte(); 
-            System.out.println("Wall: " + wall);
-            
-            byte path = inputStream.readByte(); 
-            System.out.println("Path: " + path);
-            int newline = 0;
-
-            FileOutputStream decodedMaze = new FileOutputStream("decoded_maze.txt");
-            for (int i = 0; i < 134500; i++) {
-                byte separatorValue = inputStream.readByte();
-                byte value = inputStream.readByte();
-                int count = inputStream.readUnsignedByte();
-                System.out.println("Path: " + count);
+                    separator = (char) randomAccessFile.read();
+                    char value = (char) randomAccessFile.read();
+                    int count = randomAccessFile.read();
                 
                 for (int j = 0; j <= count; j++) {
-                    if (newline == 513) {
+
+                    if (newline == lines) {
                         decodedMaze.write('\n');
                         newline=0;
                     }
@@ -75,8 +51,9 @@ public class BinaryFileReader {
                 }
             }
             decodedMaze.close();
-            System.out.println("Labirynt został zdekodowany i zapisany do pliku decoded_maze.txt");
             
+            System.out.println("Labirynt został zdekodowany i zapisany do pliku decoded_maze.txt");
+
         } catch (IOException e) {
             e.printStackTrace();
         }

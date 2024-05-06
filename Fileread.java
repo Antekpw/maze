@@ -39,7 +39,14 @@ public class Fileread {
     public int getEndY() {
         return endY;
     }
-
+    public void changestart(int x, int y){
+        startX = x;
+        startY = y;
+    }
+    public void changeend(int x, int y){
+        endX = x;
+        endY = y;
+    }
     public void read(BufferedReader in) throws IOException {
         char c;
         int x = 0;
@@ -124,7 +131,7 @@ public class Fileread {
             System.out.println();
         }
     }
-
+    
 }
 
 

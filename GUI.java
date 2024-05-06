@@ -1,34 +1,69 @@
 import javax.swing.*;
 
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
 public class GUI {
     private char[][] lab;
     public JFrame mainFrame;
     public JPanel maze;
     public JPanel buttonspanel;
     public JButton start;
-    public JButton setstartandend;
-    public JButton read;
-
-    public GUI(char[][] lab) {
+    public JButton setstart;
+    public JButton setend;
+    public JButton delete;
+    public Fileread f;
+    private boolean b = false;
+    private boolean t = false;
+    private boolean c = false;
+    public GUI(char[][] lab,Fileread f) {
         this.lab = lab;
         this.mainFrame = initWindow();
+        this.f = f;
     }
-
     private void addButton(JPanel panel) {
         start = new JButton("START BFS");
-        setstartandend= new JButton("Ustaw poczatek i koniec");
-        read = new JButton("wczytaj plik");
+        setstart= new JButton("Ustaw poczatek");
+        setstart.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                if(b==false){
+                    b = true;
+                }
+            }  
+        });
+        setend = new JButton("Ustaw koniec");
+        setend.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(t==false){
+                    t = true;
+                }
+            }
+                        
+        });
+        delete = new JButton("Usun lub dodaj sciane");
+        delete.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+               if(c==false){
+                c = true;
+               }
+            }
+            
+        });
         panel.add(start);
-        panel.add(setstartandend);
-        panel.add(read);
+        panel.add(setstart);
+        panel.add(setend);
+        panel.add(delete);
     }
-
-
     private JFrame initWindow() {
         JFrame mainFrame = new JFrame("Maze Solver");
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -52,6 +87,78 @@ public class GUI {
         for (int i = 0; i < lab.length; i++) {
             for (int j = 0; j < lab[0].length; j++) {
                 JLabel label = new JLabel();
+                final int x = j;
+                final int y = i;
+                label.addMouseListener(new MouseListener() {
+
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                     
+                    }
+
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        
+                    }
+
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
+                        if(b){
+                        lab[y][x] = 'P';
+                        setwhite(maze,f.getStartX(),f.getStartY(),lab[0].length+1);
+                        lab[f.getStartY()][f.getStartX()] = ' ';
+                        updatelab();
+                        f.changestart(x, y);
+                        System.out.printf("x0=%d,y0=%d\n",f.getStartX(),f.getStartY());
+                        colorStart(maze, x, y, lab[0].length+1);
+                        mainFrame.revalidate();
+                        updatelab();
+                        b = false;   
+                        }
+                        if(t){
+                            lab[y][x] = 'K';
+                            setwhite(maze,f.getEndX(),f.getEndY(),lab[0].length+1);
+                            lab[f.getEndY()][f.getEndX()] = ' ';
+                            updatelab();
+                            f.changeend(x, y);
+                            colorEnd(maze, x, y, lab[0].length+1);
+                            mainFrame.revalidate();
+                            updatelab();
+                            t = false; 
+                        }
+                        if(c){
+                            char c = lab[y][x];
+                            int tempx = x;
+                            int tempy = y;
+                            switch(c){
+                                case ' ':
+                                    c ='X';
+                                    setblack(maze, tempx, tempy, lab[0].length+1);
+                                    updatelab();
+                                    mainFrame.revalidate();
+                                    break;
+                                case 'X':
+                                    c = ' ';
+                                    setwhite(maze, tempx, tempy, lab[0].length+1);
+                                    updatelab();
+                                    mainFrame.revalidate();
+                                    break;
+                            }
+                        }
+                    }
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+                    
+                });
                 label.setOpaque(true);
                 label.setHorizontalAlignment(JLabel.CENTER);
                 if (lab[i][j] == 'X') {
@@ -66,31 +173,11 @@ public class GUI {
                 maze.add(label);
             }
         }
-
     }
-
-    private static JLabel makeLabel(char c) {
-        JLabel label = new JLabel();
-        label.setHorizontalAlignment(JLabel.CENTER);
-        label.setPreferredSize(new Dimension(10, 10));
-        switch (c) {
-            case 'X':
-                label.setBackground(Color.BLACK);
-                break;
-            case ' ':
-                label.setBackground(Color.WHITE);
-                break;
-            case 'P':
-                label.setBackground(Color.WHITE);
-                break;
-            case 'K':
-                label.setBackground(Color.WHITE);
-                break;
-        }
-        label.setOpaque(true);
-        return label;
+    public char[][] updatelab(){
+        return lab;
     }
-
+    
     public void changeColor(JPanel maze, int x, int y, int w) {
         int pos = y * (w - 1) + x;
         Component component = maze.getComponent(pos);
@@ -127,14 +214,39 @@ public class GUI {
     public void colorEnd(JPanel maze, int x, int y, int w) {
         int pos = y * (w - 1) + x;
         Component component = maze.getComponent(pos);
-        //System.out.println(component);
         if (component instanceof JLabel label) {
-            //System.err.printf("dla pos=%d zmieniam kolor\n",pos);
             label.setBackground(Color.RED);
             label.setVisible(true);
-            //label.setOpaque(true); //
             mainFrame.revalidate();
-
+        }
+    }
+    public void setwhite(JPanel maze, int x, int y, int w){
+        int pos = y * (w - 1) + x;
+        Component component = maze.getComponent(pos);
+        if (component instanceof JLabel label) {
+            label.setBackground(Color.white);
+            label.setVisible(true);
+            maze.revalidate();
+            mainFrame.revalidate();
+        }
+    }
+    public void setblack(JPanel maze, int x, int y, int w){
+        int pos = y * (w - 1) + x;
+        Component component = maze.getComponent(pos);
+        if (component instanceof JLabel label) {
+            label.setBackground(Color.BLACK);
+            label.setVisible(true);
+            maze.revalidate();
+            mainFrame.revalidate();
         }
     }
 }
+
+
+
+
+
+
+
+
+

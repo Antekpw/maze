@@ -16,7 +16,13 @@ public class Menu {
     private static void createAndShowGUI() {
         JFrame mainFrame = new JFrame("Maze Solver");
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainFrame.setSize(500, 100);
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int screenWidth = (int) screenSize.getWidth();
+        int screenHeight = (int) screenSize.getHeight();
+
+        int width = screenWidth / 2;
+        int height = (int) ((double) 80 / 100 * screenHeight);
+        mainFrame.setSize(width, height);
         mainFrame.setLocationRelativeTo(null);
 
         JPanel panel = new JPanel();
@@ -48,16 +54,14 @@ public class Menu {
 
         panel.add(button1);
         panel.add(button2);
-
         mainFrame.add(panel);
-
         mainFrame.setVisible(true);
     }
 
     private static void findShortestPath(String fileName) {
         Fileread f = new Fileread();
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("src/100x100.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
             f.read(reader);
             System.out.println("x0: " + f.getStartX() + ", y0: " + f.getStartY() + ", xk: " + f.getEndX() + ", yk: " +f.getEndY() + ", width: " + f.getWidth()+ ", height: " + f.getHeight());
             reader.close();
@@ -66,15 +70,21 @@ public class Menu {
         }
         
         char [][] lab = Fileread.wczytajLabirynt(fileName);
-        GUI g = new GUI(lab);
+        GUI g = new GUI(lab,f);
         g.createMaze();
+        System.err.printf("x0=%d,y0=%d\n",f.getStartX(),f.getStartY());
         g.mainFrame.add(g.maze);
         g.colorStart(g.maze,f.getStartX(),f.getStartY(),f.getWidth());
         g.colorEnd(g.maze,f.getEndX(),f.getEndY(),f.getWidth());
         g.mainFrame.setVisible(true);
+        g.start.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                BFS bfs = new BFS(g.updatelab(), f.getStartX(), f.getStartY(), f.getEndX(), f.getEndY(), f.getWidth(), f.getHeight(), g);
+                Thread t = new Thread(bfs);
+                t.start();
+            }
+        });
 
-        BFS bfs = new BFS(lab, f.getStartX(), f.getStartY(), f.getEndX(), f.getEndY(), f.getWidth(), f.getHeight(), g);
-        Thread t = new Thread(bfs);
-        t.start();
+       
     }
 }
